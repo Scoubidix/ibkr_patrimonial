@@ -53,7 +53,12 @@ class TelegramBot:
         self.ibkr = ibkr
         self.app = Application.builder().token(token).build()
         self.app.add_handler(CallbackQueryHandler(self._on_callback))
+        self.app.add_error_handler(self._on_error)
         self._pending_signals: dict[str, dict] = {}
+
+    @staticmethod
+    async def _on_error(update, context: ContextTypes.DEFAULT_TYPE):
+        log.error("Telegram error: %s", context.error, exc_info=context.error)
 
     async def send_signal(self, signal: dict, order_amount: float):
         ticker = signal["ticker"]
@@ -72,9 +77,12 @@ class TelegramBot:
 
     async def _on_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
+        log.info("Callback received: data=%s, chat_id=%s (expected=%s)",
+                 query.data, query.message.chat_id, self.chat_id)
         await query.answer()
 
-        if str(query.message.chat_id) != self.chat_id:
+        if str(query.message.chat_id) != str(self.chat_id):
+            log.warning("Chat ID mismatch, ignoring callback")
             return
 
         action, ticker = query.data.split(":", 1)
