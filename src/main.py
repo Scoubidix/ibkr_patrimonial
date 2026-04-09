@@ -121,7 +121,10 @@ async def main():
     # Run Telegram polling + scheduler together
     async with bot.app:
         await bot.app.start()
-        await bot.app.updater.start_polling()
+        await bot.app.updater.start_polling(
+            drop_pending_updates=True,
+            allowed_updates=["message", "callback_query"],
+        )
         log.info("Telegram bot polling started")
 
         try:
