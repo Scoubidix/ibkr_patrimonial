@@ -7,7 +7,6 @@ services:
       TWS_PASSWORD: ${IBKR_PASSWORD}
       TRADING_MODE: ${TRADING_MODE:-paper}
       READ_ONLY_API: "no"
-      TWS_ACCEPT_INCOMING: accept
     ports:
       - "127.0.0.1:4001:4001"
       - "127.0.0.1:4002:4002"
@@ -21,13 +20,14 @@ services:
   bot:
     build: .
     restart: always
+    network_mode: "service:ib-gateway"
     depends_on:
       ib-gateway:
         condition: service_healthy
     environment:
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
-      IB_HOST: ib-gateway
+      IB_HOST: localhost
       IB_PORT: ${IB_PORT:-4002}
       RSI_THRESHOLD: ${RSI_THRESHOLD:-50}
       SMA_MARGIN: ${SMA_MARGIN:-0.10}
