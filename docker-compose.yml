@@ -11,7 +11,7 @@ services:
       - "127.0.0.1:4001:4001"
       - "127.0.0.1:4002:4002"
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "${IB_PORT:-4002}"]
+      test: ["CMD-SHELL", "timeout 2 bash -c 'echo > /dev/tcp/localhost/4002' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
