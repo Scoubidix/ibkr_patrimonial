@@ -1,0 +1,40 @@
+services:
+  ib-gateway:
+    image: ghcr.io/gnzsnz/ib-gateway:stable
+    restart: always
+    environment:
+      TWS_USERID: ${IBKR_USERNAME}
+      TWS_PASSWORD: ${IBKR_PASSWORD}
+      TRADING_MODE: ${TRADING_MODE:-paper}
+      READ_ONLY_API: "no"
+    ports:
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "${IB_PORT:-4002}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+
+  bot:
+    build: .
+    restart: always
+    depends_on:
+      ib-gateway:
+        condition: service_healthy
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      IB_HOST: ib-gateway
+      IB_PORT: ${IB_PORT:-4002}
+      RSI_THRESHOLD: ${RSI_THRESHOLD:-50}
+      SMA_MARGIN: ${SMA_MARGIN:-0.10}
+      MIN_CASH: ${MIN_CASH:-50}
+      MIN_ORDER: ${MIN_ORDER:-10}
+      PORTFOLIO_PCT: ${PORTFOLIO_PCT:-0.01}
+      CASH_USE_PCT: ${CASH_USE_PCT:-0.90}
+      SCAN_CRON: ${SCAN_CRON:-*/5 * * * *}
+      TZ: Europe/Paris
+    volumes:
+      - ./data:/app/data

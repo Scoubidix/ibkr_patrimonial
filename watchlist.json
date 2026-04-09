@@ -1,0 +1,7 @@
+[
+  {"ticker": "AAPL", "exchange": "SMART", "currency": "USD", "sector": "Technology", "type": "wide_moat"},
+  {"ticker": "MSFT", "exchange": "SMART", "currency": "USD", "sector": "Technology", "type": "wide_moat"},
+  {"ticker": "JNJ",  "exchange": "SMART", "currency": "USD", "sector": "Healthcare", "type": "dividend_king"},
+  {"ticker": "PG",   "exchange": "SMART", "currency": "USD", "sector": "Consumer Staples", "type": "dividend_king"},
+  {"ticker": "KO",   "exchange": "SMART", "currency": "USD", "sector": "Consumer Staples", "type": "dividend_king"}
+]
