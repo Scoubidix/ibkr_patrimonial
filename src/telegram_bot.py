@@ -100,7 +100,7 @@ class TelegramBot:
             await query.edit_message_text(f"⚠️ IB Gateway déconnecté — ordre annulé pour {ticker}")
             return
 
-        result = self.ibkr.place_cash_order(
+        result = await self.ibkr.place_cash_order(
             ticker=ticker,
             exchange=signal["exchange"],
             currency=signal["currency"],

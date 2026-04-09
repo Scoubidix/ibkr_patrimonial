@@ -1,5 +1,5 @@
+import asyncio
 import logging
-import time
 from ib_insync import IB, Stock, MarketOrder
 
 log = logging.getLogger(__name__)
@@ -12,16 +12,16 @@ class IBKRClient:
         self.client_id = client_id
         self.ib = IB()
 
-    def connect(self, retries: int = 5, delay: int = 10) -> bool:
+    async def connect(self, retries: int = 5, delay: int = 10) -> bool:
         for attempt in range(1, retries + 1):
             try:
-                self.ib.connect(self.host, self.port, clientId=self.client_id)
+                await self.ib.connectAsync(self.host, self.port, clientId=self.client_id)
                 log.info("Connected to IB Gateway on %s:%s", self.host, self.port)
                 return True
             except Exception as e:
                 log.warning("Connection attempt %d/%d failed: %s", attempt, retries, e)
                 if attempt < retries:
-                    time.sleep(delay)
+                    await asyncio.sleep(delay)
         log.error("Could not connect to IB Gateway after %d attempts", retries)
         return False
 
@@ -38,7 +38,6 @@ class IBKRClient:
         for av in self.ib.accountValues():
             if av.tag == "CashBalance" and av.currency == currency:
                 return float(av.value)
-        # Try base currency if EUR not found
         for av in self.ib.accountValues():
             if av.tag == "CashBalance" and av.currency == "BASE":
                 return float(av.value)
@@ -50,7 +49,7 @@ class IBKRClient:
                 return float(av.value)
         return 0.0
 
-    def place_cash_order(self, ticker: str, exchange: str, currency: str, amount: float) -> dict:
+    async def place_cash_order(self, ticker: str, exchange: str, currency: str, amount: float) -> dict:
         contract = Stock(ticker, exchange, currency)
         qualified = self.ib.qualifyContracts(contract)
         if not qualified:
@@ -61,7 +60,7 @@ class IBKRClient:
         order.cashQty = amount
 
         trade = self.ib.placeOrder(contract, order)
-        self.ib.sleep(2)  # let IB process
+        await asyncio.sleep(2)
 
         log.info("Order placed: BUY %s cashQty=%.2f — status: %s",
                  ticker, amount, trade.orderStatus.status)

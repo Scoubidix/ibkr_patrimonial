@@ -45,7 +45,7 @@ async def run_scan():
 
     if not ibkr.is_connected:
         log.warning("IB Gateway not connected, attempting reconnect...")
-        if not ibkr.connect(retries=3, delay=5):
+        if not await ibkr.connect(retries=3, delay=5):
             if bot:
                 await bot.send_text("🚨 IB Gateway déconnecté — scan annulé")
             return
@@ -58,10 +58,8 @@ async def run_scan():
     pending_tickers = {s["ticker"] for s in signals}
     for p in pending:
         if p["ticker"] not in pending_tickers:
-            # Re-check if deferred signal is still valid
             rescan = scan([p], RSI_THRESHOLD, SMA_MARGIN)
             signals.extend(rescan)
-    # Clear pending — will be re-populated if user defers again
     save_pending([])
 
     if not signals:
@@ -98,8 +96,8 @@ async def main():
     log.info("Starting IBKR Patrimonial Bot")
     log.info("Config: RSI<%s, SMA_MARGIN=%s, CRON=%s", RSI_THRESHOLD, SMA_MARGIN, SCAN_CRON)
 
-    # Connect to IB Gateway
-    ibkr.connect()
+    # Connect to IB Gateway (async)
+    await ibkr.connect()
 
     # Init Telegram bot
     bot = TelegramBot(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, ibkr)
@@ -125,7 +123,6 @@ async def main():
         await bot.app.updater.start_polling()
         log.info("Telegram bot polling started")
 
-        # Keep running until interrupted
         try:
             while True:
                 await asyncio.sleep(3600)
