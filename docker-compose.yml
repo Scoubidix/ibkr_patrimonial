@@ -7,10 +7,7 @@ services:
       TWS_PASSWORD: ${IBKR_PASSWORD}
       TRADING_MODE: ${TRADING_MODE:-paper}
       READ_ONLY_API: "no"
-    volumes:
-      - type: bind
-        source: ./gateway/jts.ini
-        target: /home/ibgateway/Jts/jts.ini
+      TWS_ACCEPT_INCOMING: accept
     ports:
       - "127.0.0.1:4001:4001"
       - "127.0.0.1:4002:4002"
