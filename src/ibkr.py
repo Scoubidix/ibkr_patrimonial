@@ -34,9 +34,9 @@ class IBKRClient:
     def is_connected(self) -> bool:
         return self.ib.isConnected()
 
-    def get_cash_balance(self, currency: str = "EUR") -> float:
+    def get_cash_balance(self) -> float:
         for av in self.ib.accountValues():
-            if av.tag == "CashBalance" and av.currency == currency:
+            if av.tag == "TotalCashBalance" and av.currency == "BASE":
                 return float(av.value)
         for av in self.ib.accountValues():
             if av.tag == "CashBalance" and av.currency == "BASE":
@@ -44,6 +44,10 @@ class IBKRClient:
         return 0.0
 
     def get_portfolio_value(self) -> float:
+        # ib_insync uses NetLiquidationByCurrency with BASE
+        for av in self.ib.accountValues():
+            if av.tag == "NetLiquidationByCurrency" and av.currency == "BASE":
+                return float(av.value)
         for av in self.ib.accountValues():
             if av.tag == "NetLiquidation" and av.currency == "BASE":
                 return float(av.value)

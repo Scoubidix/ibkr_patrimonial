@@ -68,6 +68,7 @@ async def run_scan():
 
     cash = ibkr.get_cash_balance()
     portfolio_value = ibkr.get_portfolio_value()
+    log.info("Cash: %.2f, Portfolio value: %.2f", cash, portfolio_value)
 
     if cash < MIN_CASH:
         log.info("Cash %.2f < minimum %.2f — no orders", cash, MIN_CASH)
